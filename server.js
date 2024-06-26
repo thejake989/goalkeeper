@@ -19,14 +19,13 @@ app.use(express.json());
 const mongoURI = process.env.MONGO_URI;
 const jwtSecret = process.env.JWT_SECRET;
 
-// Log the MongoDB URI to verify it's being read correctly
-console.log("MongoDB URI:", mongoURI);
-console.log("JWT Secret:", jwtSecret);
+console.log(`MongoDB URI: ${mongoURI}`);
+console.log(`JWT Secret: ${jwtSecret}`);
 
 // Connect to MongoDB
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoURI, {})
   .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('Error connecting to MongoDB:', err));
+  .catch(err => console.log(err));
 
 // Test route to verify MongoDB connection
 app.get('/test', async (req, res) => {

@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 const User = require('./models/user');
 const Goal = require('./models/Goal');
 
@@ -19,11 +20,12 @@ app.use(express.json());
 const mongoURI = process.env.MONGO_URI;
 const jwtSecret = process.env.JWT_SECRET;
 
+// Ensure environment variables are loaded
 console.log(`MongoDB URI: ${mongoURI}`);
 console.log(`JWT Secret: ${jwtSecret}`);
 
 // Connect to MongoDB
-mongoose.connect(mongoURI, {})
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
@@ -126,6 +128,11 @@ app.put('/goals/:id', async (req, res) => {
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });
   }
+});
+
+// Catch-all handler for any request that doesn't match the above
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 
 // Start the server

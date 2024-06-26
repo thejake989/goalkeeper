@@ -29,6 +29,9 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'client/build')));
+
 // Test route to verify MongoDB connection
 app.get('/test', async (req, res) => {
   try {
@@ -130,9 +133,9 @@ app.put('/goals/:id', async (req, res) => {
   }
 });
 
-// Catch-all handler for any request that doesn't match the above
+// The "catchall" handler: for any request that doesn't match one above, send back React's index.html file.
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  res.sendFile(path.join(__dirname, 'client/build/index.html'));
 });
 
 // Start the server

@@ -3,15 +3,14 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const User = require('./models/User');
-const Goal = require('./models/Goal');
+const User = require('./models/user'); // Updated to match the casing
+const Goal = require('./models/Goal'); 
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
 // Environment variables
 const mongoURI = process.env.MONGO_URI;
@@ -58,7 +57,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/goals', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = req.headers.authorization.split(' ')[1];
   if (!token) {
     return res.status(401).json({ error: 'Token required' });
   }
@@ -76,7 +75,7 @@ app.get('/goals', async (req, res) => {
 
 app.post('/goals', async (req, res) => {
   const { text } = req.body;
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = req.headers.authorization.split(' ')[1];
 
   if (!text) {
     return res.status(400).json({ error: 'Goal text is required' });
@@ -97,7 +96,7 @@ app.post('/goals', async (req, res) => {
 app.put('/goals/:id', async (req, res) => {
   const { id } = req.params;
   const updates = req.body;
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = req.headers.authorization.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, jwtSecret);

@@ -1,13 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const app = express();
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const User = require('./models/User');
+const Goal = require('./models/Goal');
 
-const User = require('./models/User'); // Assuming you have a User model
-const Goal = require('./models/Goal'); // Assuming you have a Goal model
+const app = express();
 
 // Middleware
 app.use(cors());
@@ -58,7 +58,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/goals', async (req, res) => {
-  const token = req.headers.authorization.split(' ')[1];
+  const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
     return res.status(401).json({ error: 'Token required' });
   }
@@ -76,7 +76,7 @@ app.get('/goals', async (req, res) => {
 
 app.post('/goals', async (req, res) => {
   const { text } = req.body;
-  const token = req.headers.authorization.split(' ')[1];
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!text) {
     return res.status(400).json({ error: 'Goal text is required' });
@@ -97,7 +97,7 @@ app.post('/goals', async (req, res) => {
 app.put('/goals/:id', async (req, res) => {
   const { id } = req.params;
   const updates = req.body;
-  const token = req.headers.authorization.split(' ')[1];
+  const token = req.headers.authorization?.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, jwtSecret);

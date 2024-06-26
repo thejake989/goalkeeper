@@ -3,8 +3,11 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const User = require('./models/user'); // Updated to match the casing
-const Goal = require('./models/Goal'); 
+const dotenv = require('dotenv');
+const User = require('./models/user');
+const Goal = require('./models/Goal');
+
+dotenv.config();
 
 const app = express();
 
@@ -20,6 +23,16 @@ const jwtSecret = process.env.JWT_SECRET;
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
+
+// Test route to verify MongoDB connection
+app.get('/test', async (req, res) => {
+  try {
+    const users = await mongoose.connection.db.collection('users').find({}).toArray();
+    res.send(users);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
 
 // Routes
 app.post('/register', async (req, res) => {

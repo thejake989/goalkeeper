@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path');
 const User = require('./models/user');
 const Goal = require('./models/Goal');
 
@@ -20,7 +19,6 @@ app.use(express.json());
 const mongoURI = process.env.MONGO_URI;
 const jwtSecret = process.env.JWT_SECRET;
 
-// Ensure environment variables are loaded
 console.log(`MongoDB URI: ${mongoURI}`);
 console.log(`JWT Secret: ${jwtSecret}`);
 
@@ -28,9 +26,6 @@ console.log(`JWT Secret: ${jwtSecret}`);
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
-
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'client/build')));
 
 // Test route to verify MongoDB connection
 app.get('/test', async (req, res) => {
@@ -40,6 +35,11 @@ app.get('/test', async (req, res) => {
   } catch (err) {
     res.status(500).send(err);
   }
+});
+
+// Root route
+app.get('/', (req, res) => {
+  res.send('Welcome to the Goalkeeper API');
 });
 
 // Routes
@@ -131,11 +131,6 @@ app.put('/goals/:id', async (req, res) => {
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });
   }
-});
-
-// The "catchall" handler: for any request that doesn't match one above, send back React's index.html file.
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build/index.html'));
 });
 
 // Start the server

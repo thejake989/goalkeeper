@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path'); // Added for serving static files
+const path = require('path'); // Add this line
 const User = require('./models/user');
 const Goal = require('./models/Goal');
 
@@ -15,7 +15,6 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
 
 // Environment variables
 const mongoURI = process.env.MONGO_URI;
@@ -43,6 +42,9 @@ app.get('/test', async (req, res) => {
 app.get('/', (req, res) => {
   res.send('Welcome to the Goalkeeper API');
 });
+
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, 'public'))); // Add this line
 
 // Routes
 app.post('/register', async (req, res) => {

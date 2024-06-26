@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+
+    <div class="container mx-auto p-4">
+        <h1 class="text-4xl font-bold text-center text-gray-800 my-4">Goal Tracker</h1>
+
+        <div id="auth">
+            <h2 class="text-2xl font-semibold mb-4">Login</h2>
+            <input type="text" id="username" placeholder="Username" class="mb-2 p-2 border rounded w-full">
+            <input type="password" id="password" placeholder="Password" class="mb-2 p-2 border rounded w-full">
+            <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 mt-2 rounded hover:bg-blue-700">Login</button>
+            <button onclick="register()" class="bg-green-500 text-white px-4 py-2 mt-2 rounded hover:bg-green-700">Register</button>
+        </div>
+
+        <div id="goal-section" class="hidden">
+            <h2 class="text-2xl font-semibold mb-4">My Goals</h2>
+            <input type="text" id="new-goal" class="w-full p-2 border rounded" placeholder="Add a new goal...">
+            <button onclick="addGoal()" class="bg-blue-500 text-white px-4 py-2 mt-2 rounded hover:bg-blue-700">Add Goal</button>
+            <ul id="goal-list" class="list-none p-0 mt-4">
+                <!-- Goals will be dynamically added here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let token = '';
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            fetch('http://localhost:5000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    token = data.token;
+                    document.getElementById('auth').classList.add('hidden');
+                    document.getElementById('goal-section').classList.remove('hidden');
+                    fetchGoals();
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            });
+        }
+
+        function register() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            fetch('http://localhost:5000/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                } else {
+                    alert(data.error || 'Registration failed');
+                }
+            });
+        }
+
+        function fetchGoals() {
+            fetch('http://localhost:5000/goals', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const goalList = document.getElementById('goal-list');
+                goalList.innerHTML = '';
+                data.forEach(goal => {
+                    const li = document.createElement('li');
+                    li.className = 'bg-gray-200 p-2 mb-2 rounded flex items-center justify-between';
+
+                    const goalText = document.createElement('span');
+                    goalText.className = 'flex-grow';
+                    goalText.textContent = goal.text;
+
+                    if (goal.completed) {
+                        goalText.style.textDecoration = 'line-through';
+                        const completedDate = document.createElement('span');
+                        completedDate.className = 'text-sm text-gray-500';
+                        completedDate.textContent = `Completed on: ${new Date(goal.dateCompleted).toLocaleString()}`;
+                        li.appendChild(completedDate);
+                    }
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = goal.completed;
+                    checkbox.className = 'mr-2';
+                    checkbox.onchange = () => {
+                        updateGoal(goal._id, { completed: checkbox.checked, dateCompleted: new Date() });
+                    };
+
+                    const noteButton = document.createElement('button');
+                    noteButton.textContent = 'Add Note';
+                    noteButton.className = 'bg-green-500 text-white px-2 py-1 rounded hover:bg-green-700 ml-2';
+                    noteButton.onclick = () => {
+                        const note = prompt('Enter your note:');
+                        if (note) {
+                            updateGoal(goal._id, { note });
+                        }
+                    };
+
+                    li.appendChild(checkbox);
+                    li.appendChild(goalText);
+                    li.appendChild(noteButton);
+
+                    goalList.appendChild(li);
+                });
+            });
+        }
+
+        function addGoal() {
+            const text = document.getElementById('new-goal').value.trim();
+            if (text === '') {
+                alert('Goal text cannot be empty');
+                return;
+            }
+
+            fetch('http://localhost:5000/goals', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                fetchGoals();
+                document.getElementById('new-goal').value = '';
+            });
+        }
+
+        function updateGoal(id, updates) {
+            fetch(`http://localhost:5000/goals/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(updates)
+            })
+            .then(response => response.json())
+            .then(data => {
+                fetchGoals();
+            });
+        }
+    </script>
+</body>
+</html>

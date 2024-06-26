@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path'); // Added for serving static files
 const User = require('./models/user');
 const Goal = require('./models/Goal');
 
@@ -14,6 +15,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
 
 // Environment variables
 const mongoURI = process.env.MONGO_URI;
